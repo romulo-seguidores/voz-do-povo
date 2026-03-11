@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JSFiddle ukspogyb</title>
+
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; display: flex; justify-content: center; padding: 10px; }
+.app-container { background: white; width: 100%; max-width: 400px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow: hidden; min-height: 600px; }
+header { background: #0047ab; color: white; padding: 20px; text-align: center; }
+.p-20 { padding: 20px; }
+.hidden { display: none; }
+input, select, textarea, button { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+textarea { height: 80px; resize: none; }
+button { background: #0047ab; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+button:hover { background: #002f7a; }
+.btn-envio { background: #28a745; }
+.btn-sair { background: rgba(255,255,255,0.2); padding: 5px 10px; width: auto; font-size: 12px; float: right; margin-top: -40px; }
+.card { background: #f9f9f9; padding: 15px; border-radius: 10px; border-left: 5px solid #0047ab; margin-bottom: 15px; font-size: 14px; position: relative; }
+.status { font-weight: bold; color: #d32f2f; }
+.status.resolvido { color: #2e7d32; }
+.btn-resolver { background: #fbc02d; color: black; font-size: 12px; padding: 5px; margin-top: 5px; }
+  </style>
+
+  
+</head>
+<body>
+  <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voz da Cidade v10</title>
+    <style>
+        body { font-family: sans-serif; background: #eef2f3; margin: 0; display: flex; justify-content: center; }
+        .app-container { background: white; width: 100%; max-width: 450px; min-height: 100vh; box-shadow: 0 0 15px rgba(0,0,0,0.2); position: relative; }
+        header { background: #0047ab; color: white; padding: 25px 20px; text-align: center; position: relative; }
+        .p-20 { padding: 20px; }
+        
+        /* CORREÇÃO DAS TELAS */
+        .tela { display: none; }
+        .tela.ativa { display: block !important; }
+
+        input, select, textarea, button { width: 100%; padding: 15px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        button { background: #0047ab; color: white; border: none; font-weight: bold; cursor: pointer; }
+        
+        .btn-sair { background: #d9534f; width: auto; position: absolute; top: 20px; right: 10px; padding: 5px 10px; font-size: 12px; border-radius: 5px; }
+        .btn-voltar { background: rgba(255,255,255,0.2); width: auto; position: absolute; top: 20px; left: 10px; padding: 5px 10px; font-size: 12px; color: white; border-radius: 5px; border: 1px solid white; }
+        
+        .card { border: 1px solid #ddd; padding: 12px; border-radius: 10px; margin-bottom: 10px; background: #fdfdfd; border-left: 6px solid #0047ab; }
+        .badge { font-size: 11px; font-weight: bold; padding: 5px; border-radius: 5px; }
+        .status-pen { background: #fcf8e3; color: #8a6d3b; border: 1px solid #faebcc; }
+        .status-res { background: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div id="tela-login" class="tela ativa">
+        <header><h1>Voz da Cidade 🏙️</h1></header>
+        <div class="p-20">
+            <h3>Entrar ou Cadastrar</h3>
+            <input type="text" id="login-nome" placeholder="Seu Nome Completo">
+            <input type="text" id="login-cpf" placeholder="CPF: 000.000.000-00" maxlength="14" oninput="aplicarMascara(this)">
+            <input type="password" id="login-senha" placeholder="Sua Senha">
+            <button onclick="tentarEntrar()">ACESSAR SISTEMA</button>
+        </div>
+    </div>
+
+    <div id="tela-cidadao" class="tela">
+        <header>
+            <button class="btn-voltar" onclick="voltarParaLogin()">← Voltar</button>
+            <h2 id="nome-exibicao" style="margin:0; font-size:16px;">Oi!</h2>
+            <button class="btn-sair" onclick="voltarParaLogin()">SAIR</button>
+        </header>
+        <div class="p-20">
+            <h4>📢 Nova Reclamação</h4>
+            <select id="campo-tipo">
+                <option>Buraco na Rua</option>
+                <option>Poste sem Luz</option>
+                <option>Acúmulo de Lixo</option>
+            </select>
+            <input type="text" id="campo-local" placeholder="Rua e Bairro">
+            <textarea id="campo-desc" placeholder="Detalhes do problema..."></textarea>
+            <button onclick="processarReclamacao()" style="background:#28a745">ENVIAR AGORA</button>
+            <hr>
+            <div id="feed-cidadao"></div>
+        </div>
+    </div>
+
+    <div id="tela-prefeito" class="tela">
+        <header style="background:#1a237e">
+            <button class="btn-voltar" onclick="voltarParaLogin()">← Voltar</button>
+            <h2 style="margin:0; font-size:16px;">Gabinete 🏛️</h2>
+            <button class="btn-sair" onclick="voltarParaLogin()">SAIR</button>
+        </header>
+        <div class="p-20">
+            <h3>Pedidos Pendentes</h3>
+            <div id="feed-prefeito"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // BANCO DE DADOS
+    let usuarios = JSON.parse(localStorage.getItem("DB_USERS_V10")) || [];
+    let reclamacoes = JSON.parse(localStorage.getItem("DB_RECS_V10")) || [];
+    let usuarioLogado = null;
+
+    function aplicarMascara(i) {
+        let v = i.value.replace(/\D/g, "");
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+        i.value = v;
+    }
+
+    function mudarTela(idAlvo) {
+        // Esconde tudo primeiro
+        document.getElementById('tela-login').classList.remove('ativa');
+        document.getElementById('tela-cidadao').classList.remove('ativa');
+        document.getElementById('tela-prefeito').classList.remove('ativa');
+        // Mostra a tela certa
+        document.getElementById(idAlvo).classList.add('ativa');
+    }
+
+    function tentarEntrar() {
+        const nome = document.getElementById('login-nome').value;
+        const cpfRaw = document.getElementById('login-cpf').value;
+        const senha = document.getElementById('login-senha').value;
+        const cpfLimpo = cpfRaw.replace(/\D/g, "");
+
+        if (senha === "prefeito22") {
+            mudarTela('tela-prefeito');
+            renderPrefeito();
+            return;
+        }
+
+        if (cpfLimpo.length !== 11 || senha === "") {
+            alert("Preencha o CPF e a Senha corretamente!");
+            return;
+        }
+
+        let encontrado = usuarios.find(u => u.cpf === cpfLimpo);
+
+        if (encontrado) {
+            if (encontrado.senha === senha) {
+                usuarioLogado = encontrado;
+                entrarCidadao();
+            } else {
+                alert("Senha errada!");
+            }
+        } else {
+            if (!nome) { alert("Digite seu nome para o primeiro cadastro!"); return; }
+            let novo = { nome, cpf: cpfLimpo, senha };
+            usuarios.push(novo);
+            localStorage.setItem("DB_USERS_V10", JSON.stringify(usuarios));
+            usuarioLogado = novo;
+            alert("Conta criada!");
+            entrarCidadao();
+        }
+    }
+
+    function entrarCidadao() {
+        document.getElementById('nome-exibicao').innerText = "Cidadão: " + usuarioLogado.nome.split(' ')[0];
+        mudarTela('tela-cidadao');
+        renderCidadao();
+    }
+
+    function processarReclamacao() {
+        const local = document.getElementById('campo-local').value;
+        const desc = document.getElementById('campo-desc').value;
+        const tipo = document.getElementById('campo-tipo').value;
+
+        if (!local || !desc) { alert("Preencha tudo!"); return; }
+
+        reclamacoes.push({
+            id: Date.now(),
+            cpfDono: usuarioLogado.cpf,
+            nomeDono: usuarioLogado.nome,
+            tipo, local, desc,
+            status: "Pendente"
+        });
+
+        localStorage.setItem("DB_RECS_V10", JSON.stringify(reclamacoes));
+        alert("Enviado ao Prefeito!");
+        document.getElementById('campo-local').value = "";
+        document.getElementById('campo-desc').value = "";
+        renderCidadao();
+    }
+
+    function renderCidadao() {
+        const lista = document.getElementById('feed-cidadao');
+        const minhas = reclamacoes.filter(r => r.cpfDono === usuarioLogado.cpf);
+        lista.innerHTML = "<h4>Meu Histórico</h4>" + minhas.reverse().map(r => `
+            <div class="card"><b>${r.tipo}</b><br><small>${r.local}</small><br>
+            <span class="badge ${r.status==='Pendente'?'status-pen':'status-res'}">${r.status}</span></div>
+        `).join('');
+    }
+
+    function renderPrefeito() {
+        const lista = document.getElementById('feed-prefeito');
+        lista.innerHTML = reclamacoes.length === 0 ? "<p>Sem pedidos.</p>" :
+            reclamacoes.map(r => `
+                <div class="card"><b>${r.tipo}</b> - ${r.nomeDono}<br><small>${r.local}</small><p>"${r.desc}"</p>
+                ${r.status==='Pendente' ? `<button onclick="resolver(${r.id})" style="width:auto;padding:5px;background:orange;color:black">RESOLVER</button>` : '✅'}</div>
+            `).reverse().join('');
+    }
+
+    function resolver(id) {
+        reclamacoes = reclamacoes.map(r => r.id === id ? {...r, status: "Resolvido"} : r);
+        localStorage.setItem("DB_RECS_V10", JSON.stringify(reclamacoes));
+        renderPrefeito();
+    }
+
+    function voltarParaLogin() {
+        usuarioLogado = null;
+        document.getElementById('login-nome').value = "";
+        document.getElementById('login-cpf').value = "";
+        document.getElementById('login-senha').value = "";
+        mudarTela('tela-login');
+    }
+</script>
+</body>
+</html>
+
+  <script>
+    function fazerLogin() {
+    const nome = document.getElementById('nome-user').value;
+    const cpf = document.getElementById('cpf-user').value;
+    const senha = document.getElementById('senha-user').value;
+
+    // Se for a senha secreta, entra direto como Prefeito
+    if (senha === "prefeito22") {
+        document.getElementById('tela-login').style.display = 'none';
+        document.getElementById('tela-prefeito').style.display = 'block';
+        renderPrefeito();
+        return; 
+    }
+
+    // Validação para cidadão comum
+    if (cpf.length === 11 && nome !== "" && senha !== "") {
+        document.getElementById('tela-login').style.display = 'none';
+        document.getElementById('tela-cidadao').style.display = 'block';
+        document.getElementById('boas-vindas').innerText = "Olá, " + nome;
+        renderCidadao();
+    } else {
+        alert("Dados incorretos! Verifique o CPF (11 números) e preencha o nome.");
+    }
+}
+
+function fazerSair() {
+    // Limpa os campos e volta para a tela de login
+    document.getElementById('nome-user').value = "";
+    document.getElementById('cpf-user').value = "";
+    document.getElementById('senha-user').value = "";
+    
+    document.getElementById('tela-cidadao').style.display = 'none';
+    document.getElementById('tela-prefeito').style.display = 'none';
+    document.getElementById('tela-login').style.display = 'block';
+}
+  </script>
+</body>
+</html>
