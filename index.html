@@ -1,267 +1,582 @@
 <!DOCTYPE html>
-<html>
-
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>JSFiddle ukspogyb</title>
-
-  <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; display: flex; justify-content: center; padding: 10px; }
-.app-container { background: white; width: 100%; max-width: 400px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow: hidden; min-height: 600px; }
-header { background: #0047ab; color: white; padding: 20px; text-align: center; }
-.p-20 { padding: 20px; }
-.hidden { display: none; }
-input, select, textarea, button { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-textarea { height: 80px; resize: none; }
-button { background: #0047ab; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
-button:hover { background: #002f7a; }
-.btn-envio { background: #28a745; }
-.btn-sair { background: rgba(255,255,255,0.2); padding: 5px 10px; width: auto; font-size: 12px; float: right; margin-top: -40px; }
-.card { background: #f9f9f9; padding: 15px; border-radius: 10px; border-left: 5px solid #0047ab; margin-bottom: 15px; font-size: 14px; position: relative; }
-.status { font-weight: bold; color: #d32f2f; }
-.status.resolvido { color: #2e7d32; }
-.btn-resolver { background: #fbc02d; color: black; font-size: 12px; padding: 5px; margin-top: 5px; }
-  </style>
-
-  
-</head>
-<body>
-  <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voz da Cidade v10</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zomboid Web Survival</title>
     <style>
-        body { font-family: sans-serif; background: #eef2f3; margin: 0; display: flex; justify-content: center; }
-        .app-container { background: white; width: 100%; max-width: 450px; min-height: 100vh; box-shadow: 0 0 15px rgba(0,0,0,0.2); position: relative; }
-        header { background: #0047ab; color: white; padding: 25px 20px; text-align: center; position: relative; }
-        .p-20 { padding: 20px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: 'Courier New', Courier, monospace; }
+        body { background-color: #111; overflow: hidden; color: #fff; }
+        canvas { display: block; }
         
-        /* CORREÇÃO DAS TELAS */
-        .tela { display: none; }
-        .tela.ativa { display: block !important; }
-
-        input, select, textarea, button { width: 100%; padding: 15px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
-        button { background: #0047ab; color: white; border: none; font-weight: bold; cursor: pointer; }
+        /* UI HUD */
+        #hud { position: absolute; top: 10px; left: 10px; pointer-events: none; z-index: 10; }
+        .bar-bg { width: 200px; height: 15px; background: rgba(0,0,0,0.5); border: 1px solid #555; margin-bottom: 5px; position: relative; }
+        .bar-fill { height: 100%; transition: width 0.1s; }
+        #hp-fill { background: #d32f2f; }
+        #stamina-fill { background: #1976d2; }
+        #hunger-fill { background: #fbc02d; }
+        #thirst-fill { background: #0288d1; }
+        .bar-text { position: absolute; width: 100%; text-align: center; top: 0; font-size: 12px; font-weight: bold; text-shadow: 1px 1px 0 #000; line-height: 15px;}
         
-        .btn-sair { background: #d9534f; width: auto; position: absolute; top: 20px; right: 10px; padding: 5px 10px; font-size: 12px; border-radius: 5px; }
-        .btn-voltar { background: rgba(255,255,255,0.2); width: auto; position: absolute; top: 20px; left: 10px; padding: 5px 10px; font-size: 12px; color: white; border-radius: 5px; border: 1px solid white; }
+        #info { margin-top: 10px; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px; border: 1px solid #555;}
         
-        .card { border: 1px solid #ddd; padding: 12px; border-radius: 10px; margin-bottom: 10px; background: #fdfdfd; border-left: 6px solid #0047ab; }
-        .badge { font-size: 11px; font-weight: bold; padding: 5px; border-radius: 5px; }
-        .status-pen { background: #fcf8e3; color: #8a6d3b; border: 1px solid #faebcc; }
-        .status-res { background: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+        /* Inventário */
+        #inventory-btn { position: absolute; top: 10px; right: 10px; padding: 10px 20px; background: #333; border: 1px solid #fff; color: #fff; cursor: pointer; z-index: 10; }
+        #inventory-screen { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 500px; background: rgba(30,30,30,0.95); border: 2px solid #555; padding: 20px; display: none; z-index: 20; }
+        #inventory-screen h2 { border-bottom: 1px solid #555; padding-bottom: 10px; margin-bottom: 10px; }
+        #item-list { list-style: none; max-height: 300px; overflow-y: auto; }
+        .item { display: flex; justify-content: space-between; padding: 10px; background: #222; margin-bottom: 5px; border: 1px solid #444; }
+        .item button { padding: 5px 10px; background: #555; color: white; border: none; cursor: pointer; }
+        .item button:hover { background: #777; }
+        
+        /* Game Over */
+        #game-over { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(100,0,0,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 30; }
+        #game-over h1 { font-size: 48px; margin-bottom: 20px; }
+        #game-over button { padding: 15px 30px; font-size: 20px; cursor: pointer; background: #222; color: #fff; border: 2px solid #fff; }
+        
+        /* Mobile Controls */
+        #mobile-controls { position: absolute; bottom: 20px; left: 0; width: 100%; display: none; justify-content: space-between; padding: 0 40px; pointer-events: none; z-index: 10; }
+        .joystick { width: 100px; height: 100px; background: rgba(255,255,255,0.2); border-radius: 50%; position: relative; pointer-events: auto; }
+        .stick { width: 40px; height: 40px; background: rgba(255,255,255,0.5); border-radius: 50%; position: absolute; top: 30px; left: 30px; }
+        @media (max-width: 768px) { #mobile-controls { display: flex; } }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div id="tela-login" class="tela ativa">
-        <header><h1>Voz da Cidade 🏙️</h1></header>
-        <div class="p-20">
-            <h3>Entrar ou Cadastrar</h3>
-            <input type="text" id="login-nome" placeholder="Seu Nome Completo">
-            <input type="text" id="login-cpf" placeholder="CPF: 000.000.000-00" maxlength="14" oninput="aplicarMascara(this)">
-            <input type="password" id="login-senha" placeholder="Sua Senha">
-            <button onclick="tentarEntrar()">ACESSAR SISTEMA</button>
+    <div id="hud">
+        <div class="bar-bg"><div id="hp-fill" class="bar-fill" style="width: 100%;"></div><div class="bar-text">HP</div></div>
+        <div class="bar-bg"><div id="stamina-fill" class="bar-fill" style="width: 100%;"></div><div class="bar-text">STAMINA</div></div>
+        <div class="bar-bg"><div id="hunger-fill" class="bar-fill" style="width: 100%;"></div><div class="bar-text">FOME</div></div>
+        <div class="bar-bg"><div id="thirst-fill" class="bar-fill" style="width: 100%;"></div><div class="bar-text">SEDE</div></div>
+        <div id="info">
+            Dias: <span id="days-ui">0</span> | Hora: <span id="time-ui">12:00</span><br>
+            Arma: <span id="weapon-ui">Mãos</span> | Mun: <span id="ammo-ui">∞</span>
         </div>
     </div>
 
-    <div id="tela-cidadao" class="tela">
-        <header>
-            <button class="btn-voltar" onclick="voltarParaLogin()">← Voltar</button>
-            <h2 id="nome-exibicao" style="margin:0; font-size:16px;">Oi!</h2>
-            <button class="btn-sair" onclick="voltarParaLogin()">SAIR</button>
-        </header>
-        <div class="p-20">
-            <h4>📢 Nova Reclamação</h4>
-            <select id="campo-tipo">
-                <option>Buraco na Rua</option>
-                <option>Poste sem Luz</option>
-                <option>Acúmulo de Lixo</option>
-            </select>
-            <input type="text" id="campo-local" placeholder="Rua e Bairro">
-            <textarea id="campo-desc" placeholder="Detalhes do problema..."></textarea>
-            <button onclick="processarReclamacao()" style="background:#28a745">ENVIAR AGORA</button>
-            <hr>
-            <div id="feed-cidadao"></div>
-        </div>
+    <button id="inventory-btn">Inventário (I)</button>
+
+    <div id="inventory-screen">
+        <h2>Mochila (<span id="weight-ui">0</span>/20kg)</h2>
+        <ul id="item-list"></ul>
+        <button onclick="toggleInventory()" style="margin-top:10px; padding:10px; width:100%; cursor:pointer;">Fechar</button>
     </div>
 
-    <div id="tela-prefeito" class="tela">
-        <header style="background:#1a237e">
-            <button class="btn-voltar" onclick="voltarParaLogin()">← Voltar</button>
-            <h2 style="margin:0; font-size:16px;">Gabinete 🏛️</h2>
-            <button class="btn-sair" onclick="voltarParaLogin()">SAIR</button>
-        </header>
-        <div class="p-20">
-            <h3>Pedidos Pendentes</h3>
-            <div id="feed-prefeito"></div>
-        </div>
+    <div id="game-over">
+        <h1>VOCÊ MORREU</h1>
+        <p style="margin-bottom:20px; font-size:20px;">Dias sobrevivendo: <span id="final-days"></span></p>
+        <button onclick="location.reload()">Tentar Novamente</button>
     </div>
-</div>
+
+    <div id="mobile-controls">
+        <div class="joystick" id="joy-move"><div class="stick" id="stick-move"></div></div>
+        <div class="joystick" id="joy-aim"><div class="stick" id="stick-aim"></div></div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
 
 <script>
-    // BANCO DE DADOS
-    let usuarios = JSON.parse(localStorage.getItem("DB_USERS_V10")) || [];
-    let reclamacoes = JSON.parse(localStorage.getItem("DB_RECS_V10")) || [];
-    let usuarioLogado = null;
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    function aplicarMascara(i) {
-        let v = i.value.replace(/\D/g, "");
-        v = v.replace(/(\d{3})(\d)/, "$1.$2");
-        v = v.replace(/(\d{3})(\d)/, "$1.$2");
-        v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-        i.value = v;
+// --- CONFIGURAÇÕES GERAIS ---
+const MAP_SIZE = 3000;
+const TILE_SIZE = 100;
+let gameTime = 12; // Começa ao meio dia
+let daysSurvived = 0;
+let isPaused = false;
+
+// --- DADOS DAS ARMAS ---
+const WEAPONS = {
+    hands: { name: 'Mãos', type: 'melee', damage: 10, range: 40, speed: 500, weight: 0 },
+    knife: { name: 'Faca', type: 'melee', damage: 30, range: 50, speed: 300, weight: 1 },
+    axe: { name: 'Machado', type: 'melee', damage: 70, range: 60, speed: 1000, weight: 3 },
+    pistol: { name: 'Pistola', type: 'ranged', damage: 40, range: 400, speed: 400, weight: 2, ammo: 15 },
+    shotgun: { name: 'Escopeta', type: 'ranged', damage: 25, range: 300, speed: 1200, weight: 4, ammo: 8, spread: 5 }
+};
+
+// --- INPUTS ---
+const keys = {};
+const mouse = { x: canvas.width/2, y: canvas.height/2, down: false };
+window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if(e.key.toLowerCase() === 'i') toggleInventory(); });
+window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+window.addEventListener('mousedown', e => mouse.down = true);
+window.addEventListener('mouseup', e => mouse.down = false);
+
+// --- CLASSES ---
+class Player {
+    constructor(x, y) {
+        this.x = x; this.y = y; this.radius = 15;
+        this.speed = 3; this.runSpeed = 5;
+        this.angle = 0;
+        this.hp = 100; this.maxHp = 100;
+        this.stamina = 100; this.maxStamina = 100;
+        this.hunger = 100; this.thirst = 100;
+        this.inventory = [{id: 'knife', type: 'weapon', ...WEAPONS.knife}, {id: 'pistol', type: 'weapon', ...WEAPONS.pistol}];
+        this.equippedWeapon = WEAPONS.hands;
+        this.lastAttack = 0;
+        this.dead = false;
     }
 
-    function mudarTela(idAlvo) {
-        // Esconde tudo primeiro
-        document.getElementById('tela-login').classList.remove('ativa');
-        document.getElementById('tela-cidadao').classList.remove('ativa');
-        document.getElementById('tela-prefeito').classList.remove('ativa');
-        // Mostra a tela certa
-        document.getElementById(idAlvo).classList.add('ativa');
+    update() {
+        if(this.dead) return;
+
+        // Movimento
+        let isRunning = keys['shift'] && this.stamina > 0 && (keys['w']||keys['a']||keys['s']||keys['d']);
+        let currentSpeed = isRunning ? this.runSpeed : this.speed;
+        
+        let dx = 0, dy = 0;
+        if (keys['w']) dy -= currentSpeed;
+        if (keys['s']) dy += currentSpeed;
+        if (keys['a']) dx -= currentSpeed;
+        if (keys['d']) dx += currentSpeed;
+
+        // Normalizar diagonal
+        if(dx !== 0 && dy !== 0) {
+            let length = Math.sqrt(dx*dx + dy*dy);
+            dx = (dx/length) * currentSpeed; dy = (dy/length) * currentSpeed;
+        }
+
+        this.x += dx; this.y += dy;
+
+        // Limites do mapa
+        this.x = Math.max(this.radius, Math.min(MAP_SIZE - this.radius, this.x));
+        this.y = Math.max(this.radius, Math.min(MAP_SIZE - this.radius, this.y));
+
+        // Mirar no mouse (considerando a câmera)
+        let worldMouseX = mouse.x + camera.x;
+        let worldMouseY = mouse.y + camera.y;
+        this.angle = Math.atan2(worldMouseY - this.y, worldMouseX - this.x);
+
+        // Atacar
+        if(mouse.down && Date.now() - this.lastAttack > this.equippedWeapon.speed) {
+            this.attack();
+            this.lastAttack = Date.now();
+        }
+
+        // Status depletion
+        if(isRunning) this.stamina = Math.max(0, this.stamina - 0.2);
+        else this.stamina = Math.min(this.maxStamina, this.stamina + 0.1);
+        
+        this.hunger -= 0.001; this.thirst -= 0.002;
+        if(this.hunger <= 0 || this.thirst <= 0) this.hp -= 0.05;
+
+        if(this.hp <= 0) gameOver();
     }
 
-    function tentarEntrar() {
-        const nome = document.getElementById('login-nome').value;
-        const cpfRaw = document.getElementById('login-cpf').value;
-        const senha = document.getElementById('login-senha').value;
-        const cpfLimpo = cpfRaw.replace(/\D/g, "");
-
-        if (senha === "prefeito22") {
-            mudarTela('tela-prefeito');
-            renderPrefeito();
-            return;
-        }
-
-        if (cpfLimpo.length !== 11 || senha === "") {
-            alert("Preencha o CPF e a Senha corretamente!");
-            return;
-        }
-
-        let encontrado = usuarios.find(u => u.cpf === cpfLimpo);
-
-        if (encontrado) {
-            if (encontrado.senha === senha) {
-                usuarioLogado = encontrado;
-                entrarCidadao();
-            } else {
-                alert("Senha errada!");
+    attack() {
+        let w = this.equippedWeapon;
+        if(w.type === 'melee') {
+            // Verifica zumbis na área
+            for(let z of zombies) {
+                let dist = Math.hypot(z.x - this.x, z.y - this.y);
+                if(dist < w.range) {
+                    // Verifica ângulo
+                    let angleToZ = Math.atan2(z.y - this.y, z.x - this.x);
+                    let diff = Math.abs(this.angle - angleToZ);
+                    if(diff < 0.8 || diff > Math.PI*2 - 0.8) {
+                        z.takeDamage(w.damage);
+                        spawnParticles(z.x, z.y, '#8b0000', 5);
+                    }
+                }
             }
+        } else if (w.type === 'ranged') {
+            if(w.ammo > 0) {
+                w.ammo--;
+                let bulletsToFire = w.spread ? w.spread : 1;
+                for(let i=0; i<bulletsToFire; i++) {
+                    let spreadAngle = this.angle + (Math.random() - 0.5) * (w.spread ? 0.4 : 0.05);
+                    bullets.push(new Bullet(this.x, this.y, spreadAngle, w.damage, w.range));
+                }
+                spawnParticles(this.x + Math.cos(this.angle)*20, this.y + Math.sin(this.angle)*20, '#ffcc00', 3);
+            }
+        }
+        updateHUD();
+    }
+
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        
+        // Corpo
+        ctx.beginPath(); ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#42a5f5'; ctx.fill(); ctx.stroke();
+        
+        // Arma/Direção
+        ctx.fillStyle = '#555';
+        ctx.fillRect(this.radius - 5, -5, 15, 10);
+        
+        ctx.restore();
+    }
+}
+
+class Zombie {
+    constructor(x, y) {
+        this.x = x; this.y = y; this.radius = 15;
+        this.speed = Math.random() * 0.5 + 0.5; // Zumbis lentos
+        this.hp = 50;
+        this.angle = Math.random() * Math.PI * 2;
+        this.state = 'wander'; // wander, chase
+        this.lastAttack = 0;
+    }
+
+    update() {
+        let distToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
+        
+        // De noite ou muito perto, eles veem melhor
+        let aggroRange = (gameTime > 19 || gameTime < 6) ? 400 : 250;
+
+        if(distToPlayer < aggroRange && !player.dead) {
+            this.state = 'chase';
+            this.angle = Math.atan2(player.y - this.y, player.x - this.x);
         } else {
-            if (!nome) { alert("Digite seu nome para o primeiro cadastro!"); return; }
-            let novo = { nome, cpf: cpfLimpo, senha };
-            usuarios.push(novo);
-            localStorage.setItem("DB_USERS_V10", JSON.stringify(usuarios));
-            usuarioLogado = novo;
-            alert("Conta criada!");
-            entrarCidadao();
+            this.state = 'wander';
+            if(Math.random() < 0.01) this.angle += (Math.random() - 0.5);
+        }
+
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
+
+        // Ataque ao player
+        if(distToPlayer < this.radius + player.radius && Date.now() - this.lastAttack > 1000) {
+            player.hp -= 15;
+            spawnParticles(player.x, player.y, '#8b0000', 5);
+            this.lastAttack = Date.now();
         }
     }
 
-    function entrarCidadao() {
-        document.getElementById('nome-exibicao').innerText = "Cidadão: " + usuarioLogado.nome.split(' ')[0];
-        mudarTela('tela-cidadao');
-        renderCidadao();
+    takeDamage(amt) {
+        this.hp -= amt;
+        if(this.hp <= 0) {
+            // Dropa loot as vezes
+            if(Math.random() < 0.3) items.push(new Item(this.x, this.y));
+            zombies.splice(zombies.indexOf(this), 1);
+        }
     }
 
-    function processarReclamacao() {
-        const local = document.getElementById('campo-local').value;
-        const desc = document.getElementById('campo-desc').value;
-        const tipo = document.getElementById('campo-tipo').value;
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        ctx.beginPath(); ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#66bb6a'; ctx.fill(); ctx.stroke();
+        // Braços zumbi
+        ctx.fillStyle = '#388e3c';
+        ctx.fillRect(10, -12, 12, 6);
+        ctx.fillRect(10, 6, 12, 6);
+        ctx.restore();
+    }
+}
 
-        if (!local || !desc) { alert("Preencha tudo!"); return; }
+class Bullet {
+    constructor(x, y, angle, damage, range) {
+        this.x = x; this.y = y;
+        this.vx = Math.cos(angle) * 15;
+        this.vy = Math.sin(angle) * 15;
+        this.damage = damage;
+        this.range = range;
+        this.distanceTraveled = 0;
+    }
+    update() {
+        this.x += this.vx; this.y += this.vy;
+        this.distanceTraveled += 15;
+        
+        // Colisão com zumbis
+        for(let z of zombies) {
+            if(Math.hypot(z.x - this.x, z.y - this.y) < z.radius) {
+                z.takeDamage(this.damage);
+                spawnParticles(z.x, z.y, '#8b0000', 4);
+                return true; // Destroy bullet
+            }
+        }
+        return this.distanceTraveled >= this.range;
+    }
+    draw() {
+        ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI*2);
+        ctx.fillStyle = '#fff'; ctx.fill();
+    }
+}
 
-        reclamacoes.push({
-            id: Date.now(),
-            cpfDono: usuarioLogado.cpf,
-            nomeDono: usuarioLogado.nome,
-            tipo, local, desc,
-            status: "Pendente"
+class Item {
+    constructor(x, y) {
+        this.x = x; this.y = y;
+        const types = [
+            { id: 'water', name: 'Garrafa d\'água', type: 'consumable', thirst: 40, weight: 0.5 },
+            { id: 'food', name: 'Lata de Feijão', type: 'consumable', hunger: 50, weight: 0.5 },
+            { id: 'medkit', name: 'Kit Médico', type: 'consumable', hp: 50, weight: 1 },
+            { id: 'ammo', name: 'Caixa de Munição', type: 'ammo', amount: 10, weight: 0.5 }
+        ];
+        this.data = types[Math.floor(Math.random() * types.length)];
+        this.radius = 8;
+    }
+    draw() {
+        ctx.beginPath(); ctx.rect(this.x - 5, this.y - 5, 10, 10);
+        ctx.fillStyle = this.data.type === 'consumable' ? '#ff9800' : '#9e9e9e';
+        ctx.fill(); ctx.stroke();
+    }
+}
+
+class Particle {
+    constructor(x, y, color) {
+        this.x = x; this.y = y;
+        this.vx = (Math.random() - 0.5) * 5; this.vy = (Math.random() - 0.5) * 5;
+        this.life = 1; this.color = color;
+    }
+    update() {
+        this.x += this.vx; this.y += this.vy;
+        this.life -= 0.05;
+        return this.life <= 0;
+    }
+    draw() {
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI*2);
+        ctx.fillStyle = this.color; ctx.fill();
+        ctx.globalAlpha = 1;
+    }
+}
+
+// --- VARIÁVEIS DE JOGO ---
+let player = new Player(MAP_SIZE/2, MAP_SIZE/2);
+let zombies = [];
+let bullets = [];
+let items = [];
+let particles = [];
+let houses = []; // Caixas pretas para simular construções (obstáculos)
+
+const camera = { x: 0, y: 0 };
+
+// --- FUNÇÕES DE SETUP ---
+function initMap() {
+    // Gerar casas aleatórias
+    for(let i=0; i<30; i++) {
+        houses.push({
+            x: Math.random() * (MAP_SIZE - 200), y: Math.random() * (MAP_SIZE - 200),
+            w: 100 + Math.random() * 200, h: 100 + Math.random() * 200
         });
-
-        localStorage.setItem("DB_RECS_V10", JSON.stringify(reclamacoes));
-        alert("Enviado ao Prefeito!");
-        document.getElementById('campo-local').value = "";
-        document.getElementById('campo-desc').value = "";
-        renderCidadao();
     }
-
-    function renderCidadao() {
-        const lista = document.getElementById('feed-cidadao');
-        const minhas = reclamacoes.filter(r => r.cpfDono === usuarioLogado.cpf);
-        lista.innerHTML = "<h4>Meu Histórico</h4>" + minhas.reverse().map(r => `
-            <div class="card"><b>${r.tipo}</b><br><small>${r.local}</small><br>
-            <span class="badge ${r.status==='Pendente'?'status-pen':'status-res'}">${r.status}</span></div>
-        `).join('');
-    }
-
-    function renderPrefeito() {
-        const lista = document.getElementById('feed-prefeito');
-        lista.innerHTML = reclamacoes.length === 0 ? "<p>Sem pedidos.</p>" :
-            reclamacoes.map(r => `
-                <div class="card"><b>${r.tipo}</b> - ${r.nomeDono}<br><small>${r.local}</small><p>"${r.desc}"</p>
-                ${r.status==='Pendente' ? `<button onclick="resolver(${r.id})" style="width:auto;padding:5px;background:orange;color:black">RESOLVER</button>` : '✅'}</div>
-            `).reverse().join('');
-    }
-
-    function resolver(id) {
-        reclamacoes = reclamacoes.map(r => r.id === id ? {...r, status: "Resolvido"} : r);
-        localStorage.setItem("DB_RECS_V10", JSON.stringify(reclamacoes));
-        renderPrefeito();
-    }
-
-    function voltarParaLogin() {
-        usuarioLogado = null;
-        document.getElementById('login-nome').value = "";
-        document.getElementById('login-cpf').value = "";
-        document.getElementById('login-senha').value = "";
-        mudarTela('tela-login');
-    }
-</script>
-</body>
-</html>
-
-  <script>
-    function fazerLogin() {
-    const nome = document.getElementById('nome-user').value;
-    const cpf = document.getElementById('cpf-user').value;
-    const senha = document.getElementById('senha-user').value;
-
-    // Se for a senha secreta, entra direto como Prefeito
-    if (senha === "prefeito22") {
-        document.getElementById('tela-login').style.display = 'none';
-        document.getElementById('tela-prefeito').style.display = 'block';
-        renderPrefeito();
-        return; 
-    }
-
-    // Validação para cidadão comum
-    if (cpf.length === 11 && nome !== "" && senha !== "") {
-        document.getElementById('tela-login').style.display = 'none';
-        document.getElementById('tela-cidadao').style.display = 'block';
-        document.getElementById('boas-vindas').innerText = "Olá, " + nome;
-        renderCidadao();
-    } else {
-        alert("Dados incorretos! Verifique o CPF (11 números) e preencha o nome.");
-    }
+    // Gerar loot inicial
+    for(let i=0; i<50; i++) items.push(new Item(Math.random() * MAP_SIZE, Math.random() * MAP_SIZE));
+    // Zumbis iniciais
+    for(let i=0; i<100; i++) spawnZombie();
 }
 
-function fazerSair() {
-    // Limpa os campos e volta para a tela de login
-    document.getElementById('nome-user').value = "";
-    document.getElementById('cpf-user').value = "";
-    document.getElementById('senha-user').value = "";
+function spawnZombie() {
+    let x, y;
+    do {
+        x = Math.random() * MAP_SIZE; y = Math.random() * MAP_SIZE;
+    } while(Math.hypot(player.x - x, player.y - y) < 400); // Não nascer perto do player
+    zombies.push(new Zombie(x, y));
+}
+
+function spawnParticles(x, y, color, amount) {
+    for(let i=0; i<amount; i++) particles.push(new Particle(x, y, color));
+}
+
+// --- INVENTÁRIO & UI ---
+document.getElementById('inventory-btn').onclick = toggleInventory;
+
+function toggleInventory() {
+    isPaused = !isPaused;
+    const invDiv = document.getElementById('inventory-screen');
+    invDiv.style.display = isPaused ? 'block' : 'none';
+    if(isPaused) renderInventory();
+}
+
+function renderInventory() {
+    const list = document.getElementById('item-list');
+    list.innerHTML = '';
+    let weight = 0;
     
-    document.getElementById('tela-cidadao').style.display = 'none';
-    document.getElementById('tela-prefeito').style.display = 'none';
-    document.getElementById('tela-login').style.display = 'block';
+    player.inventory.forEach((item, index) => {
+        weight += item.weight || 0;
+        let li = document.createElement('li');
+        li.className = 'item';
+        let actBtn = item.type === 'weapon' ? `<button onclick="equipWeapon(${index})">Equipar</button>` : 
+                     `<button onclick="useItem(${index})">Usar</button>`;
+        li.innerHTML = `<span>${item.name} (${item.weight}kg)</span> <div>${actBtn} <button onclick="dropItem(${index})">Soltar</button></div>`;
+        list.appendChild(li);
+    });
+    document.getElementById('weight-ui').innerText = weight.toFixed(1);
 }
-  </script>
+
+function equipWeapon(index) {
+    player.equippedWeapon = player.inventory[index];
+    updateHUD();
+    toggleInventory();
+}
+
+function useItem(index) {
+    let item = player.inventory[index];
+    if(item.hp) player.hp = Math.min(player.maxHp, player.hp + item.hp);
+    if(item.hunger) player.hunger = Math.min(100, player.hunger + item.hunger);
+    if(item.thirst) player.thirst = Math.min(100, player.thirst + item.thirst);
+    if(item.id === 'ammo') {
+        let gun = player.inventory.find(i => i.id === 'pistol' || i.id === 'shotgun');
+        if(gun) gun.ammo += item.amount;
+    }
+    player.inventory.splice(index, 1);
+    renderInventory(); updateHUD();
+}
+
+function dropItem(index) {
+    let item = player.inventory.splice(index, 1)[0];
+    let drop = new Item(player.x, player.y);
+    drop.data = item; // Repõe os dados
+    items.push(drop);
+    renderInventory();
+}
+
+function updateHUD() {
+    document.getElementById('hp-fill').style.width = (player.hp / player.maxHp * 100) + '%';
+    document.getElementById('stamina-fill').style.width = (player.stamina / player.maxStamina * 100) + '%';
+    document.getElementById('hunger-fill').style.width = player.hunger + '%';
+    document.getElementById('thirst-fill').style.width = player.thirst + '%';
+    
+    document.getElementById('days-ui').innerText = daysSurvived;
+    let h = Math.floor(gameTime);
+    let m = Math.floor((gameTime - h) * 60);
+    document.getElementById('time-ui').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+    
+    document.getElementById('weapon-ui').innerText = player.equippedWeapon.name;
+    document.getElementById('ammo-ui').innerText = player.equippedWeapon.type === 'ranged' ? player.equippedWeapon.ammo : '∞';
+}
+
+function gameOver() {
+    player.dead = true;
+    document.getElementById('game-over').style.display = 'flex';
+    document.getElementById('final-days').innerText = daysSurvived;
+    
+    // LocalStorage Salvar Highscore
+    let best = localStorage.getItem('zomboid_best') || 0;
+    if(daysSurvived > best) localStorage.setItem('zomboid_best', daysSurvived);
+}
+
+// --- LOOP PRINCIPAL ---
+let lastTime = Date.now();
+function gameLoop() {
+    requestAnimationFrame(gameLoop);
+    if(isPaused || player.dead) return;
+
+    let now = Date.now();
+    let dt = (now - lastTime) / 1000;
+    lastTime = now;
+
+    // Tempo
+    gameTime += dt * 0.5; // Escala de tempo do jogo
+    if(gameTime >= 24) { gameTime = 0; daysSurvived++; }
+
+    // Atualiza Player
+    player.update();
+
+    // Coleta de itens (Automática ao pisar)
+    for(let i = items.length - 1; i >= 0; i--) {
+        if(Math.hypot(player.x - items[i].x, player.y - items[i].y) < player.radius + items[i].radius) {
+            let totalWeight = player.inventory.reduce((sum, it) => sum + (it.weight||0), 0);
+            if(totalWeight + items[i].data.weight <= 20) { // Peso max
+                player.inventory.push(items[i].data);
+                items.splice(i, 1);
+            }
+        }
+    }
+
+    // Atualiza Entidades
+    for(let i = bullets.length - 1; i >= 0; i--) {
+        if(bullets[i].update()) bullets.splice(i, 1);
+    }
+    for(let z of zombies) z.update();
+    for(let i = particles.length - 1; i >= 0; i--) {
+        if(particles[i].update()) particles.splice(i, 1);
+    }
+
+    // Spawn contínuo de zumbis
+    if(zombies.length < 150) {
+        if(Math.random() < 0.05) spawnZombie();
+    }
+
+    // Atualiza Câmera
+    camera.x = player.x - canvas.width / 2;
+    camera.y = player.y - canvas.height / 2;
+
+    updateHUD();
+    render();
+}
+
+function render() {
+    // Fundo (Grama)
+    ctx.fillStyle = '#2e4c23';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.translate(-camera.x, -camera.y);
+
+    // Grid do chão
+    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+    for(let x=0; x<MAP_SIZE; x+=TILE_SIZE) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, MAP_SIZE); ctx.stroke();
+    }
+    for(let y=0; y<MAP_SIZE; y+=TILE_SIZE) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(MAP_SIZE, y); ctx.stroke();
+    }
+
+    // Casas
+    ctx.fillStyle = '#444';
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 4;
+    for(let h of houses) {
+        ctx.fillRect(h.x, h.y, h.w, h.h);
+        ctx.strokeRect(h.x, h.y, h.w, h.h);
+    }
+
+    // Entidades
+    for(let i of items) i.draw();
+    for(let z of zombies) z.draw();
+    for(let b of bullets) b.draw();
+    for(let p of particles) p.draw();
+    player.draw();
+
+    ctx.restore();
+
+    // Iluminação dia/noite (Overlay)
+    let darkness = 0;
+    if(gameTime > 18 || gameTime < 6) {
+        // Anoitecer/Amanhecer transição
+        let diff = gameTime > 18 ? gameTime - 18 : 6 - gameTime;
+        darkness = Math.min(0.85, diff * 0.2); // Máximo de 85% escuro
+        
+        ctx.fillStyle = `rgba(0, 0, 15, ${darkness})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Simular lanterna do player
+        if(darkness > 0.4) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-out';
+            let grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 50, canvas.width/2, canvas.height/2, 300);
+            grad.addColorStop(0, 'rgba(255,255,255,1)');
+            grad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            // Cone de visão da lanterna
+            ctx.moveTo(canvas.width/2, canvas.height/2);
+            ctx.arc(canvas.width/2, canvas.height/2, 400, player.angle - 0.5, player.angle + 0.5);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+}
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+
+initMap();
+gameLoop();
+
+</script>
 </body>
 </html>
